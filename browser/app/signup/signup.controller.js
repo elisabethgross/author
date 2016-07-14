@@ -1,7 +1,8 @@
 'use-strict';
 
-app.controller('signup', function($scope, $http, $state, $log, Auth) {
+app.controller('signup', function($scope, AuthFactory) {
 
-  $scope.submitSignup = Auth.post('/signup', $scope.signup);
-
+  $scope.submitSignup = function () {
+    return AuthFactory.signup($scope.signup);
+  };
 });

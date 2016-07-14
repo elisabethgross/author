@@ -22,23 +22,6 @@ app.use(require('./request-state.middleware'));
 
 app.use(require('./statics.middleware'));
 
-app.use('/login', function (req, res, next) {
-
-  console.log('LOGIN ATTEMPT BEING MADE')
-  User.findOne({
-    where: req.body
-  })
-  .then(function (user) {
-    if (!user) {
-      res.sendStatus(401);
-    } else {
-      req.session.userId = user.id;
-      res.sendStatus(204);
-    }
-  })
-  .catch(next);
-
-});
 
 app.use('/api', require('../api/api.router'));
 
@@ -49,6 +32,48 @@ validFrontendRoutes.forEach(function (stateRoute) {
     res.sendFile(indexPath);
   });
 });
+
+app.use('/auth/me', function(req, res, next) {
+
+  User.findOne({
+    where: {
+      id: req.session.userId
+    }
+  })
+  .then(function (user) {
+    if (!user) {
+      res.sendStatus(401);
+    } else {
+      res.send(user);
+      res.sendStatus(200);
+    }
+  })
+  .catch(next);
+})
+
+app.use('/login', function (req, res, next) {
+
+  User.findOne({
+    where: req.body
+  })
+  .then(function (user) {
+    if (!user) {
+      res.sendStatus(401);
+    } else {
+      req.session.userId = user.id;
+      res.send(user);
+      res.sendStatus(204);
+    }
+  })
+  .catch(next);
+
+});
+
+app.use('/logout', function(req, res, next) {
+  req.session.userId = null;
+  res.sendStatus(200);
+});
+
 
 app.use(require('./error.middleware'));
 
